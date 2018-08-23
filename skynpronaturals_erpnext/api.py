@@ -26,7 +26,7 @@ def validate_stock_entry(self, method):
 		for d in self.get('items'):
 			linked_entry_item_qty = frappe.db.get_value("Stock Entry Detail", filters={"parent": self.spn_linked_transit_entry, "item_code": d.item_code}, fieldname= "qty")
 			if linked_entry_item_qty < d.qty-((d.spn_rejected_qty or 0.0) + (d.spn_qty_lost or 0.0)):
-				 frappe.throw(_(" Item Qty should not exceed quantity in transit" ))
+				frappe.throw(_(" Item Qty should not exceed quantity in transit" ))
 
 
 @frappe.whitelist()
@@ -35,7 +35,7 @@ def validate_purchase_receipt(self, method):
 		for d in self.get('items'):
 			# linked_entry_item_qty = frappe.db.get_value("Stock Entry Detail", filters={"parent": self.spn_linked_transit_entry, "item_code": d.item_code}, fieldname= "qty")
 			if d.rejected_qty != d.spn_rejected_qty + d.spn_transit_loss_qty:
-				 frappe.throw(_("Row #{0}: Item Qty should not exceed quantity in transit {1}").format(d.idx, d.item_code))
+				frappe.throw(_("Row #{0}: Item Qty should not exceed quantity in transit {1}").format(d.idx, d.item_code))
 
 
 @frappe.whitelist()
@@ -169,7 +169,7 @@ def make_new_stock_entry(self, method):
 def make_new_reject_entry(self, method):
 
 	for x in xrange(1,5):
-		print "REJECT"
+		print ("REJECT")
 
 	items_with_loss_qty = [i for i in self.get('items') if i.spn_rejected_qty> 0.0]
 	if len(items_with_loss_qty) > 0:
@@ -190,7 +190,7 @@ def make_new_reject_entry(self, method):
 
 			s.company = self.company or erpnext.get_default_company()
 			for item in [item for item in self.items if (item.spn_rejected_qty > 0)]:
-				print "SRC", wh_src, "FROM", item.spn_rejected_warehouse				
+				print ("SRC", wh_src, "FROM", item.spn_rejected_warehouse)
 				s.append("items", {
 					"item_code": item.item_code,
 					"s_warehouse": wh_src,
@@ -306,7 +306,7 @@ def csv_to_json():
 	#with open('/home/gaurav/Downloads/25a4cbe4397b494a_2016-12-03_2017-01-02.csv', 'rb') as csvfile:
 	with open(csv_path, 'rb') as csvfile:
 		rdr = csv.reader(csvfile, delimiter=str(','), quotechar=str('"'))
-	   
+ 
 		for row in rdr:
 			file_rows.append(row)
 
@@ -331,9 +331,9 @@ def process_invoices(debit_to="Debtors - SPN", income_ac="Sales - SPN", cost_cen
 	def process_voucher_no(voucher_no):
 
 		naming_series = voucher_no[:-4] + "-#####"
-		voucher_no = voucher_no[:-4] + "-" + voucher_no[-4:].zfill(5) 
+		voucher_no = voucher_no[:-4] + "-" + voucher_no[-4:].zfill(5)
 
-		print "Voucher No", voucher_no, "Naming Series", naming_series
+		print ("Voucher No", voucher_no, "Naming Series", naming_series)
 
 		return voucher_no, naming_series
 
@@ -365,14 +365,14 @@ def process_invoices(debit_to="Debtors - SPN", income_ac="Sales - SPN", cost_cen
 		try:
 			net_total = sum([float(i.get("Quantity")) * float(i.get("Rate")) for i in rows if i.get("Voucher No") == uv])
 			grand_total = sum([
-						(float(i.get("Quantity")) * float(i.get("Rate"))) + 
+						(float(i.get("Quantity")) * float(i.get("Rate"))) +
 						((float(i.get("Quantity")) * float(i.get("Rate"))) * (percentage_by_voucher_no(i.get("Voucher No")) if i.get("Percentage") == "null" else float(i.get("Percentage")) / 100)) for i in rows if i.get("Voucher No") == uv])
 
 			if net_total < 0:
 				continue
 
 		except Exception as e:
-			print e, uv
+			print (e, uv)
 			return 
 
 		newrow = {}
@@ -427,7 +427,7 @@ def process_invoices(debit_to="Debtors - SPN", income_ac="Sales - SPN", cost_cen
 
 		processed_recs += 1
 
-	print "Total records processed:", processed_recs
+	print ("Total records processed:", processed_recs)
 	return out
 	
 # def process_invoices(debit_to="Debtors - SPN", income_ac="Sales - SPN", cost_center="Main - SPN"):
@@ -541,13 +541,10 @@ def csvtest():
 	column_headings_row = ["name", "naming_series", "posting_date", "company", "customer", "currency", "conversion_rate", "selling_price_list", "price_list_currency", "plc_conversion_rate", "base_net_total", "base_grand_total", "grand_total", "debit_to", "c_form_applicable", "is_return", "~", "item_code", "item_name", "description", "qty","rate", "amount", "base_rate", "base_amount", "income_account", "cost_center"]
 
 	with open('/home/gaurav/Downloads/anotherone.csv', 'w') as csvfile:
-	    fieldnames = column_headings_row #['last_name', 'first_name']
-	    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		fieldnames = column_headings_row #['last_name', 'first_name']
+		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-	    writer.writeheader()
-	    for row in rows:
-	    	writer.writerow(row)
-
-
-
+		writer.writeheader()
+		for row in rows:
+			writer.writerow(row)
 
